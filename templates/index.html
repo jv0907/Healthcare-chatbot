@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Healthcare Assistant</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://kit.fontawesome.com/a81368914c.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <div class="chat-container">
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="bot-avatar">
+        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712100.png" alt="bot">
+      </div>
+      <div>
+        <h2>MedBot AI</h2>
+        <p>Your personal healthcare companion 💙</p>
+      </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-box" id="chat-box">
+      <div class="bot-message fade-in">
+        👋 Hello! I'm <b>MedBot</b>, your AI health assistant.<br>
+        Tell me your symptoms, like “I have a headache” or “I feel tired”.
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="chat-input">
+      <input type="text" id="user-input" placeholder="Type your symptoms..." onkeydown="if(event.key==='Enter') sendMessage()">
+      <button onclick="sendMessage()" id="send-btn"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>🩺 Developed by <b>Your Name</b> | AI-Based Healthcare Chatbot</p>
+  </footer>
+
+  <!-- JS Logic -->
+  <script>
+    async function sendMessage() {
+      const inputField = document.getElementById("user-input");
+      const userMessage = inputField.value.trim();
+      if (!userMessage) return;
+
+      const chatBox = document.getElementById("chat-box");
+      chatBox.innerHTML += `<div class='user-message fade-in'><span>${userMessage}</span></div>`;
+      inputField.value = "";
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      // Add typing animation
+      const typing = document.createElement("div");
+      typing.classList.add("bot-message", "typing");
+      typing.innerHTML = `<span class="dot"></span><span class="dot"></span><span class="dot"></span>`;
+      chatBox.appendChild(typing);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      // Send message to Flask backend
+      const response = await fetch("/get", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: userMessage}),
+      });
+      const data = await response.json();
+
+      // Remove typing animation
+      typing.remove();
+
+      // Display bot reply
+      chatBox.innerHTML += `<div class='bot-message fade-in'><span>${data.reply}</span></div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  </script>
+
+</body>
+</html>
